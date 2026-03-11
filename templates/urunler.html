@@ -1,0 +1,134 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+{% if session.get('admin_girdi') %}
+<div class="admin-top-bar">
+    <span>⚡ <b>is doğal yemeğim</b> Yönetim Paneli Aktif</span>
+    <div>
+        <a href="{{ url_for('admin_dashboard') }}" class="admin-link">📊 Dashboard</a>
+        <a href="{{ url_for('urun_ekle') }}" class="admin-btn-add">+ Yeni Ürün Ekle</a>
+        <a href="{{ url_for('logout') }}" class="admin-logout">Güvenli Çıkış</a>
+    </div>
+</div>
+{% endif %}
+
+<h2 class="page-title">Doğal Lezzet Koleksiyonumuz</h2>
+
+<div class="search-container">
+    
+    <input type="text" id="liveSearch" onkeyup="searchProducts()" placeholder="Ürün ara..." class="search-input">
+
+<script>
+function searchProducts() {
+    let input = document.getElementById('liveSearch').value.toLowerCase();
+    let cards = document.getElementsByClassName('product-card');
+    
+    for (let i = 0; i < cards.length; i++) {
+        let title = cards[i].getElementsByTagName('h3')[0].innerText.toLowerCase();
+        cards[i].style.display = title.includes(input) ? "" : "none";
+    }
+}
+</script>
+</div>
+
+<div class="product-grid">
+
+    {% for urun in urunler %}
+    <div class="product-card">
+        
+        <div class="badge-container">
+            {% if loop.first %}
+                <div class="product-badge new">YENİ</div>
+            {% endif %}
+            {# İleride indirim sütunu eklersek buraya indirim etiketi gelecek #}
+        </div>
+
+        <a href="{{ url_for('urun_detay', id=urun.id) }}" class="product-link">
+            <div class="img-container">
+                <img src="{{ urun.resim }}" alt="{{ urun.ad }}" onerror="this.src='https://via.placeholder.com/300x200?text=Gorsel+Yok'">
+            </div>
+            <h3>{{ urun.ad }}</h3>
+        </a>
+        
+        <p class="price">{{ urun.fiyat }} TL</p>
+        
+        <div class="action-buttons">
+            <a href="{{ url_for('sepete_ekle', id=urun.id) }}" class="cart-btn">
+                🛒 Sepete Ekle
+            </a>
+            
+            <a href="https://wa.me/905510465380?text={{ urun.ad }}%20siparişi%20vermek%20istiyorum" class="ws-btn">
+                WhatsApp ile Sipariş Ver
+            </a>
+
+            {% if session.get('admin_girdi') %}
+            <div class="admin-controls">
+                <a href="/urun_guncelle/{{ urun.id }}" class="edit-btn">✏️ GÜNCELLE</a>
+               <a href="{{ url_for('urun_sil', id=urun.id) }}" 
+   onclick="return confirm('Bu ürünü silmek istediğine emin misin patron?')" 
+   style="color: red; font-weight: bold; text-decoration: none; margin-left: 10px;">
+   [SİL 🗑️]
+</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+
+<style>
+:root {
+    --primary-color: #2d5a27;
+    --card-bg: #ffffff;
+}
+
+.page-title { text-align: center; margin-bottom: 30px; color: var(--primary-color); font-weight: bold; }
+
+/* Admin Bar */
+.admin-top-bar {
+    background: #2d5a27; color: white; padding: 15px; border-radius: 10px; 
+    margin: 20px 0; display: flex; justify-content: space-between; align-items: center; 
+    position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.admin-link { color: #FFD700; text-decoration: none; font-weight: bold; margin-right: 15px; }
+.admin-btn-add { background: white; color: #2d5a27; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-weight: bold; }
+.admin-logout { color: #ffcccc; text-decoration: none; font-size: 0.9rem; margin-left: 10px; }
+
+/* Arama */
+
+.search-container { text-align: center; margin-bottom: 40px; }
+.search-input { padding: 12px; width: 300px; border-radius: 25px; border: 2px solid var(--primary-color); outline: none; }
+.search-btn { padding: 12px 25px; border-radius: 25px; background: var(--primary-color); color: white; border: none; cursor: pointer; font-weight: bold; }
+
+/* Kartlar */
+.product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; padding: 20px; }
+.product-card { 
+    background: var(--card-bg); border: 1px solid #eee; border-radius: 15px; 
+    padding: 15px; text-align: center; position: relative; transition: 0.3s;
+    display: flex; flex-direction: column; justify-content: space-between;
+}
+.product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+/* Badge */
+.product-badge { position: absolute; top: 10px; left: 10px; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; color: white; z-index: 10; }
+.new { background: #e67e22; }
+
+.img-container img { width: 100%; height: 210px; object-fit: cover; border-radius: 10px; }
+.price { font-size: 1.5rem; color: var(--primary-color); font-weight: bold; margin: 15px 0; }
+
+.action-buttons { display: flex; gap: 8px; flex-direction: column; }
+.cart-btn { background: var(--primary-color); color: white; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+.ws-btn { background-color: #25D366; color: white; padding: 12px; text-decoration: none; border-radius: 8px; font-weight: bold; }
+
+/* Admin Araçları */
+.admin-controls {
+    display: flex; justify-content: space-between; background: #fdfaf5; 
+    padding: 12px; border-radius: 8px; margin-top: 10px; border: 1px solid #e2d1b3;
+}
+.edit-btn { color: #2980b9; text-decoration: none; font-weight: bold; font-size: 0.85rem; }
+.delete-btn { color: #c0392b; text-decoration: none; font-weight: bold; font-size: 0.85rem; }
+</style>
+
+{% endblock %}

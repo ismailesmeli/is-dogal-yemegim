@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="hero-content">
+        <h1>DY Doğal Yemeğim'e Hoş Geldiniz</h1>
+        <p>Dalından kapınıza, %100 doğal ve katkısız lezzetler.</p>
+        <a href="/urunler" class="btn-primary">Ürünlerimizi Keşfet</a>
+    </div>
+</section>
+
+<section class="features">
+    <div class="feature-card">
+        <h3>🌱 %100 Organik</h3>
+        <p>Ürünlerimizde hiçbir kimyasal veya koruyucu madde kullanmıyoruz.</p>
+    </div>
+    <div class="feature-card">
+        <h3>🚜 Yerel Üretim</h3>
+        <p>Küçük üreticiden doğrudan sizin sofranıza ulaştırıyoruz.</p>
+    </div>
+    <div class="feature-card">
+        <h3>🚚 Hızlı Teslimat</h3>
+        <p>Siparişlerinizi en taze haliyle kapınıza getiriyoruz.</p>
+    </div>
+</section>
+
+<style>
+    .hero-section {
+        background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');
+        background-size: cover;
+        background-position: center;
+        height: 400px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        color: white;
+        border-radius: 15px;
+        margin-bottom: 40px;
+    }
+
+    .hero-content h1 {
+        font-size: 3rem;
+        margin-bottom: 10px;
+    }
+
+    .btn-primary {
+        display: inline-block;
+        background-color: #2d5a27;
+        color: white;
+        padding: 12px 30px;
+        text-decoration: none;
+        border-radius: 25px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .btn-primary:hover {
+        background-color: #e67e22;
+    }
+
+    .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .feature-card {
+        background: #f5f5dc;
+        padding: 25px;
+        border-radius: 10px;
+        text-align: center;
+        border-bottom: 4px solid #2d5a27;
+    }
+</style>
+{% endblock %}

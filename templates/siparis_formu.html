@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block content %}
+<div style="max-width: 500px; margin: 50px auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+    <h2 style="color: #2d5a27; text-align: center;">Sipariş Bilgileri</h2>
+    <p style="text-align: center; color: #666;">Bilgilerinizi girin, siparişinizi WhatsApp üzerinden tamamlayalım.</p>
+    
+    <div id="siparisForm">
+        <input type="text" id="adSoyad" placeholder="Adınız Soyadınız" style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px;">
+        <input type="text" id="telefon" placeholder="Telefon Numaranız" style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px;">
+        <textarea id="adres" placeholder="Teslimat Adresiniz" style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; height: 100px;"></textarea>
+        
+        <button onclick="whatsappGonder()" style="width: 100%; background: #25D366; color: white; padding: 15px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 1.1rem;">
+            WhatsApp ile Siparişi Bitir 🚀
+        </button>
+    </div>
+</div>
+
+<script>
+function whatsappGonder() {
+    const ad = document.getElementById('adSoyad').value;
+    const tel = document.getElementById('telefon').value;
+    const adres = document.getElementById('adres').value;
+    const sepet = "{{ sepet_ozeti }}"; // Flask'tan gelen sepet verisi
+
+    const mesaj = `Merhaba *is doğal yemeğim*,\n\n*Sipariş Detayı:* ${sepet}\n\n*Müşteri:* ${ad}\n*Tel:* ${tel}\n*Adres:* ${adres}`;
+    const encodedMesaj = encodeURIComponent(mesaj);
+    window.location.href = `https://wa.me/905510465380?text=${encodedMesaj}`;
+}
+</script>
+{% endblock %}
