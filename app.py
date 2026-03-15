@@ -232,7 +232,10 @@ def hakkimizda(): return render_template('hakkimizda.html')
 
 @app.route('/iletisim')
 def iletisim(): return render_template('iletisim.html')
-
+@app.route('/sepet/temizle')
+def sepet_temizle():
+    session.pop('sepet', None)
+    return redirect(url_for('sepet_goruntule'))
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
