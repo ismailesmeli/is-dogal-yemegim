@@ -276,5 +276,6 @@ def hakkimizda(): return render_template('hakkimizda.html')
 def iletisim(): return render_template('iletisim.html')
 
 if __name__ == "__main__":
-    # Kendi bilgisayarın için en güvenli ve standart ayar budur
-    app.run(debug=True, port=5001)
+    # Render'ın portunu otomatik alması için bu ayar şart:
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
