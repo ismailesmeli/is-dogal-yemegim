@@ -58,10 +58,7 @@ function searchProducts() {
                 🛒 Sepete Ekle
             </a>
             
-            <a href="https://wa.me/905510465380?text={{ urun.ad }}%20siparişi%20vermek%20istiyorum" class="ws-btn">
-                WhatsApp ile Sipariş Ver
-            </a>
-
+           
             {% if session.get('admin_girdi') %}
             <div class="admin-controls">
                 <a href="/urun_guncelle/{{ urun.id }}" class="edit-btn">✏️ GÜNCELLE</a>
