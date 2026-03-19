@@ -1,0 +1,185 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div style="max-width:1100px;margin:0 auto">
+
+    <!-- Breadcrumb -->
+    <div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:20px">
+        <a href="/" style="text-decoration:none;color:var(--text-muted)">Ana Sayfa</a> /
+        <a href="/urunler" style="text-decoration:none;color:var(--text-muted)">Ürünler</a> /
+        <span style="color:var(--primary)">{{ urun.ad }}</span>
+    </div>
+
+    <!-- Main Product -->
+    <div style="display:flex;gap:40px;flex-wrap:wrap;background:var(--white);padding:32px;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:40px">
+
+        <!-- Image -->
+        <div style="flex:1;min-width:280px">
+            <div style="border-radius:var(--radius);overflow:hidden;background:#f5f5f5">
+                <img src="{{ urun.resim }}" alt="{{ urun.ad }}"
+                     style="width:100%;max-height:420px;object-fit:cover"
+                     onerror="this.src='https://via.placeholder.com/420x300?text=DY'">
+            </div>
+            {% if urun.kat_ad %}
+            <div style="margin-top:12px">
+                <a href="/urunler?kategori={{ urun.kategori_id }}"
+                   style="display:inline-block;background:rgba(45,106,79,0.1);color:var(--primary);padding:5px 14px;border-radius:var(--radius-pill);font-size:0.82rem;text-decoration:none;font-weight:600">
+                    {{ urun.kat_ad }}
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Info -->
+        <div style="flex:1;min-width:280px">
+            <h1 style="font-family:'Playfair Display',serif;color:var(--primary-dark);margin-bottom:14px;font-size:1.9rem">{{ urun.ad }}</h1>
+
+            <!-- Stars -->
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">
+                <span style="color:#f1c40f;font-size:1.3rem;letter-spacing:2px">
+                    {% for i in range(5) %}{% if i < ortalama|int %}★{% else %}☆{% endif %}{% endfor %}
+                </span>
+                <span style="font-weight:700;color:var(--text)">{{ ortalama }}/5</span>
+                <span style="color:var(--text-muted);font-size:0.85rem">({{ yorumlar|length }} değerlendirme)</span>
+            </div>
+
+            <!-- Price -->
+            <div style="margin-bottom:20px">
+                {% if urun.indirim_fiyat %}
+                <div style="font-size:2.4rem;font-weight:800;color:var(--primary);line-height:1">{{ urun.indirim_fiyat }} TL</div>
+                <div style="font-size:1rem;color:var(--text-muted);text-decoration:line-through;margin-top:4px">{{ urun.fiyat }} TL</div>
+                <div style="display:inline-block;background:var(--danger);color:white;padding:3px 10px;border-radius:var(--radius-pill);font-size:0.8rem;font-weight:700;margin-top:6px">
+                    %{{ ((1 - urun.indirim_fiyat / urun.fiyat) * 100)|int }} İndirim
+                </div>
+                {% else %}
+                <div style="font-size:2.4rem;font-weight:800;color:var(--primary);line-height:1">{{ urun.fiyat }} TL</div>
+                {% endif %}
+            </div>
+
+            <!-- Stok -->
+            {% if urun.stok is not none %}
+            <div style="margin-bottom:18px">
+                {% if urun.stok > 10 %}
+                <span style="display:inline-flex;align-items:center;gap:6px;color:var(--success);font-size:0.85rem;font-weight:600">
+                    <span style="width:8px;height:8px;background:var(--success);border-radius:50%;display:inline-block"></span>
+                    Stokta Var ({{ urun.stok }} adet)
+                </span>
+                {% elif urun.stok > 0 %}
+                <span style="display:inline-flex;align-items:center;gap:6px;color:var(--warning);font-size:0.85rem;font-weight:600">
+                    <span style="width:8px;height:8px;background:var(--warning);border-radius:50%;display:inline-block"></span>
+                    Son {{ urun.stok }} Adet!
+                </span>
+                {% else %}
+                <span style="display:inline-flex;align-items:center;gap:6px;color:var(--danger);font-size:0.85rem;font-weight:600">
+                    <span style="width:8px;height:8px;background:var(--danger);border-radius:50%;display:inline-block"></span>
+                    Stokta Yok
+                </span>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Description -->
+            <div style="background:var(--cream);padding:18px;border-radius:var(--radius-sm);margin-bottom:24px;line-height:1.8;color:#555;font-size:0.9rem">
+                {{ urun.aciklama or "Bu ürün tamamen doğal yöntemlerle üretilmiş olup hiçbir katkı maddesi içermez. DY Doğal Yemeğim güvencesiyle sofranıza geliyor." }}
+            </div>
+
+            <!-- Quantity + Add to Cart -->
+            <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+                <div style="display:flex;align-items:center;border:1.5px solid var(--border);border-radius:var(--radius-pill);overflow:hidden">
+                    <button onclick="changeQty(-1)" style="padding:10px 16px;background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--text)">−</button>
+                    <span id="qtyDisplay" style="padding:0 12px;font-weight:700;min-width:32px;text-align:center">1</span>
+                    <button onclick="changeQty(1)" style="padding:10px 16px;background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--text)">+</button>
+                </div>
+                {% if urun.stok > 0 %}
+                <a href="{{ url_for('sepete_ekle', id=urun.id) }}" class="btn btn-primary" id="addCartBtn" style="flex:1;min-width:180px">
+                    🛒 Sepete Ekle
+                </a>
+                {% else %}
+                <span class="btn btn-disabled" style="flex:1">Stokta Yok</span>
+                {% endif %}
+            </div>
+            <a href="https://wa.me/905510465380?text={{ urun.ad|urlencode }}%20sipari%C5%9Fi%20vermek%20istiyorum"
+               class="btn btn-wa" target="_blank">WhatsApp ile Sipariş Ver</a>
+        </div>
+    </div>
+
+    <!-- Reviews -->
+    <div style="background:var(--white);padding:32px;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:40px">
+        <h3 style="font-family:'Playfair Display',serif;color:var(--primary-dark);margin-bottom:24px;padding-bottom:12px;border-bottom:2px solid var(--border)">
+            Müşteri Değerlendirmeleri
+        </h3>
+        <div style="display:flex;gap:40px;flex-wrap:wrap">
+            <div style="flex:2;min-width:240px">
+                {% for y in yorumlar %}
+                <div style="padding:16px 0;border-bottom:1px solid var(--border)">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                        <strong>{{ y.isim }}</strong>
+                        <span style="color:#f1c40f;letter-spacing:2px">{{ "★" * y.puan }}{{ "☆" * (5 - y.puan) }}</span>
+                    </div>
+                    <div style="color:var(--success);font-size:0.78rem;font-weight:700;margin-bottom:6px">✓ Onaylanmış Alışveriş</div>
+                    <p style="color:#555;font-size:0.9rem;margin:0">{{ y.yorum_metni }}</p>
+                </div>
+                {% else %}
+                <p style="color:var(--text-muted);padding:20px 0">Henüz değerlendirme yok. İlk yorumu sen yap!</p>
+                {% endfor %}
+            </div>
+
+            <!-- Review Form -->
+            <div style="flex:1;min-width:240px;background:var(--cream);padding:22px;border-radius:var(--radius);height:fit-content">
+                <h4 style="color:var(--primary);margin-bottom:16px">Yorum Yap</h4>
+                <form action="/yorum_yap" method="POST">
+                    <input type="hidden" name="urun_id" value="{{ urun.id }}">
+                    <input type="text" name="isim" placeholder="Adınız" required class="form-input" style="margin-bottom:10px">
+                    <select name="puan" class="form-select" style="margin-bottom:10px">
+                        <option value="5">⭐⭐⭐⭐⭐ Mükemmel</option>
+                        <option value="4">⭐⭐⭐⭐ İyi</option>
+                        <option value="3">⭐⭐⭐ Orta</option>
+                        <option value="2">⭐⭐ Kötü</option>
+                        <option value="1">⭐ Çok Kötü</option>
+                    </select>
+                    <textarea name="yorum" placeholder="Deneyiminizi paylaşın..." required class="form-textarea" style="margin-bottom:10px;height:80px"></textarea>
+                    <button type="submit" class="btn btn-primary" style="width:100%">Gönder</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Benzer Ürünler -->
+    {% if benzer %}
+    <div class="section-heading">
+        <h2>Benzer Ürünler</h2>
+        <div class="section-line"></div>
+    </div>
+    <div class="product-grid" style="margin-bottom:20px">
+        {% for u in benzer %}
+        <div class="product-card">
+            <a href="{{ url_for('urun_detay', id=u.id) }}" style="text-decoration:none;color:inherit">
+                <div class="img-wrap">
+                    <img src="{{ u.resim }}" alt="{{ u.ad }}" onerror="this.src='https://via.placeholder.com/280x180?text=DY'">
+                </div>
+                <h3>{{ u.ad }}</h3>
+            </a>
+            <div class="price-row">
+                {% if u.indirim_fiyat %}<span class="price-main">{{ u.indirim_fiyat }} TL</span><span class="price-old">{{ u.fiyat }} TL</span>
+                {% else %}<span class="price-main">{{ u.fiyat }} TL</span>{% endif %}
+            </div>
+            <a href="{{ url_for('sepete_ekle', id=u.id) }}" class="btn btn-primary">🛒 Sepete Ekle</a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+{% block scripts %}
+<script>
+let qty = 1;
+const maxStock = {{ urun.stok or 999 }};
+function changeQty(delta) {
+    qty = Math.max(1, Math.min(qty + delta, maxStock));
+    document.getElementById('qtyDisplay').textContent = qty;
+    const btn = document.getElementById('addCartBtn');
+    if (btn) btn.href = '{{ url_for("sepete_ekle", id=urun.id) }}';
+}
+</script>
+{% endblock %}
+{% endblock %}

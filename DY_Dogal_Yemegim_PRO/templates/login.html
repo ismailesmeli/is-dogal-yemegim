@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div style="max-width: 350px; margin: 80px auto; padding: 30px; border: 2px solid #2d5a27; border-radius: 15px; background: #f9f9f9; text-align: center;">
+    <h2 style="color: #2d5a27; margin-bottom: 20px;">Yönetici Girişi</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div style="padding: 10px; margin-bottom: 15px; border-radius: 8px; background: {% if category == 'danger' %}#fde8e8{% else %}#e8f5e9{% endif %}; color: {% if category == 'danger' %}#c0392b{% else %}#2d5a27{% endif %}; font-weight: bold;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endwith %}
+    <form method="POST">
+        <input type="text" name="username" placeholder="Kullanıcı Adı" required
+               style="width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box;">
+        <input type="password" name="password" placeholder="Şifre" required
+               style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box;">
+        <button type="submit" style="width: 100%; padding: 12px; background: #2d5a27; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem;">
+            Giriş Yap
+        </button>
+    </form>
+</div>
+{% endblock %}

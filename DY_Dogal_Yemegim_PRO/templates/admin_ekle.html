@@ -1,0 +1,90 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="form-card" style="max-width:600px">
+    <h2 class="form-title">Yeni Ürün Ekle</h2>
+    <form method="POST" enctype="multipart/form-data">
+
+        <div class="form-group">
+            <label class="form-label">Ürün Adı *</label>
+            <input type="text" name="ad" required class="form-input" placeholder="Örn: Çam Balı 500g">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="form-group">
+                <label class="form-label">Normal Fiyat (TL) *</label>
+                <input type="number" name="fiyat" required class="form-input" placeholder="250" min="0">
+            </div>
+            <div class="form-group">
+                <label class="form-label">İndirimli Fiyat (TL)</label>
+                <input type="number" name="indirim_fiyat" class="form-input" placeholder="200" min="0">
+                <div class="form-hint">Boş bırakılırsa indirim uygulanmaz.</div>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="form-group">
+                <label class="form-label">Kategori</label>
+                <select name="kategori_id" class="form-select">
+                    <option value="">-- Kategori Seç --</option>
+                    {% for k in kategoriler %}
+                    <option value="{{ k.id }}">{{ k.ikon }} {{ k.ad }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Stok Adedi</label>
+                <input type="number" name="stok" class="form-input" value="100" min="0">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Ürün Fotoğrafı</label>
+            <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
+                <div class="drop-zone-icon">☁️</div>
+                <p style="margin:0;font-size:0.88rem;color:#666">Tıkla veya sürükle-bırak</p>
+                <input type="file" id="fileInput" name="resim_dosya" accept="image/*" style="display:none" onchange="previewImg(this)">
+            </div>
+            <div class="form-hint">Veya URL girin:</div>
+            <input type="text" name="resim" class="form-input" placeholder="https://..." style="margin-top:6px">
+            <img id="imgPreview" src="" style="display:none;max-width:100%;border-radius:var(--radius-sm);margin-top:10px;max-height:160px;object-fit:cover">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Ürün Açıklaması</label>
+            <textarea name="aciklama" class="form-textarea" placeholder="Ürün hakkında detaylı bilgi..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">WhatsApp Kısa Mesaj</label>
+            <input type="text" name="mesaj" class="form-input" placeholder="Sipariş için WA mesajı...">
+        </div>
+
+        <div class="form-group">
+            <label class="form-check">
+                <input type="checkbox" name="featured">
+                <span>Öne çıkan ürün olarak işaretle ⭐</span>
+            </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%">Ürünü Ekle</button>
+        <a href="{{ url_for('admin_dashboard') }}" style="display:block;text-align:center;margin-top:12px;color:var(--text-muted);font-size:0.85rem;text-decoration:none">Vazgeç</a>
+    </form>
+</div>
+
+{% block scripts %}
+<script>
+function previewImg(input) {
+    const file = input.files[0];
+    if (file) {
+        const r = new FileReader();
+        r.onload = e => {
+            const img = document.getElementById('imgPreview');
+            img.src = e.target.result;
+            img.style.display = 'block';
+        };
+        r.readAsDataURL(file);
+    }
+}
+</script>
+{% endblock %}
+{% endblock %}

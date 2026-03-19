@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+
+{% block content %}
+{% if session.get('admin_girdi') %}
+<div class="admin-top-bar">
+    <span>⚡ <b>Admin Paneli</b> Aktif</span>
+    <div>
+        <a href="{{ url_for('admin_dashboard') }}" class="admin-link">📊 Dashboard</a>
+        <a href="{{ url_for('admin_siparisler') }}" class="admin-link">📦 Siparişler</a>
+        <a href="{{ url_for('admin_kategoriler') }}" class="admin-link">🏷️ Kategoriler</a>
+        <a href="{{ url_for('urun_ekle') }}" class="admin-btn-add">+ Ürün Ekle</a>
+        <a href="{{ url_for('logout') }}" class="admin-logout">Çıkış</a>
+    </div>
+</div>
+{% endif %}
+
+<h2 class="page-title">Doğal Lezzet Koleksiyonu</h2>
+
+<!-- Arama -->
+<div class="search-wrap">
+    <input type="text" id="liveSearch" placeholder="Ürün ara..." class="search-input" value="{{ query }}">
+</div>
+
+<!-- Kategori Filtre Bar -->
+{% if kategoriler %}
+<div class="cat-bar">
+    <a href="{{ url_for('urunler') }}" class="cat-chip {% if not kategori_id %}active{% endif %}">🌿 Tümü</a>
+    {% for k in kategoriler %}
+    <a href="{{ url_for('urunler', kategori=k.id, siralama=siralama) }}"
+       class="cat-chip {% if kategori_id|string == k.id|string %}active{% endif %}">
+        {{ k.ikon }} {{ k.ad }}
+    </a>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Sort Bar -->
+<div class="sort-bar">
+    <span class="result-count">{{ toplam_urun }} ürün bulundu</span>
+    <select onchange="window.location.href=this.value">
+        {% set base = url_for('urunler', kategori=kategori_id, q=query) %}
+        <option value="{{ base }}&siralama=yeni" {% if siralama=='yeni' %}selected{% endif %}>En Yeni</option>
+        <option value="{{ base }}&siralama=fiyat_asc" {% if siralama=='fiyat_asc' %}selected{% endif %}>Fiyat: Düşük → Yüksek</option>
+        <option value="{{ base }}&siralama=fiyat_desc" {% if siralama=='fiyat_desc' %}selected{% endif %}>Fiyat: Yüksek → Düşük</option>
+        <option value="{{ base }}&siralama=indirimli" {% if siralama=='indirimli' %}selected{% endif %}>İndirimli Ürünler</option>
+    </select>
+</div>
+
+<!-- Ürün Grid -->
+<div class="product-grid" id="productGrid">
+    {% for urun in urunler %}
+    <div class="product-card">
+        <div class="badges">
+            {% if loop.first and not kategori_id %}<span class="badge badge-new">YENİ</span>{% endif %}
+            {% if urun.indirim_fiyat %}<span class="badge badge-sale">-{{ ((1 - urun.indirim_fiyat / urun.fiyat) * 100)|int }}%</span>{% endif %}
+            {% if urun.stok == 0 %}<span class="badge badge-out">Tükendi</span>{% endif %}
+        </div>
+
+        <a href="{{ url_for('urun_detay', id=urun.id) }}" style="text-decoration:none;color:inherit">
+            <div class="img-wrap">
+                <img src="{{ urun.resim }}" alt="{{ urun.ad }}" onerror="this.src='https://via.placeholder.com/280x200?text=DY'">
+            </div>
+            <h3>{{ urun.ad }}</h3>
+            {% if urun.kat_ad %}<div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:6px">{{ urun.kat_ad }}</div>{% endif %}
+        </a>
+
+        <div class="price-row">
+            {% if urun.indirim_fiyat %}
+                <span class="price-main">{{ urun.indirim_fiyat }} TL</span>
+                <span class="price-old">{{ urun.fiyat }} TL</span>
+            {% else %}
+                <span class="price-main">{{ urun.fiyat }} TL</span>
+            {% endif %}
+        </div>
+
+        <!-- Stok Bar -->
+        {% if urun.stok is not none and urun.stok < 20 %}
+        <div class="stock-text">Stok: {{ urun.stok }} adet kaldı</div>
+        <div class="stock-bar">
+            <div class="stock-fill {% if urun.stok <= 5 %}low{% endif %}" style="width:{{ [urun.stok * 5, 100]|min }}%"></div>
+        </div>
+        {% endif %}
+
+        <div class="action-buttons">
+            {% if urun.stok > 0 %}
+            <a href="{{ url_for('sepete_ekle', id=urun.id) }}" class="btn btn-primary">🛒 Sepete Ekle</a>
+            <a href="https://wa.me/905510465380?text={{ urun.ad|urlencode }}%20sipari%C5%9Fi%20vermek%20istiyorum"
+               class="btn btn-wa" target="_blank">WhatsApp ile Sipariş</a>
+            {% else %}
+            <span class="btn btn-disabled">Stokta Yok</span>
+            {% endif %}
+
+            {% if session.get('admin_girdi') %}
+            <div class="admin-controls">
+                <a href="{{ url_for('toggle_featured', id=urun.id) }}" class="edit-btn">
+                    {% if urun.featured %}⭐ Öne Çıkarma Kaldır{% else %}☆ Öne Çıkar{% endif %}
+                </a>
+                <a href="{{ url_for('urun_guncelle', id=urun.id) }}" class="edit-btn">✏️ Düzenle</a>
+                <a href="{{ url_for('urun_sil', id=urun.id) }}"
+                   onclick="return confirm('Bu ürünü silmek istediğine emin misin?')"
+                   class="del-btn">🗑️ Sil</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div style="grid-column:1/-1;text-align:center;padding:60px 0;color:var(--text-muted)">
+        <div style="font-size:3rem;margin-bottom:12px">🔍</div>
+        <p>Ürün bulunamadı.</p>
+        <a href="{{ url_for('urunler') }}" class="btn btn-outline" style="display:inline-block;margin-top:12px">Tüm Ürünleri Gör</a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if toplam_sayfa > 1 %}
+<div class="pagination">
+    {% if sayfa > 1 %}
+    <a href="{{ url_for('urunler', kategori=kategori_id, q=query, siralama=siralama, sayfa=sayfa-1) }}" class="page-btn">‹</a>
+    {% endif %}
+    {% for p in range(1, toplam_sayfa+1) %}
+    <a href="{{ url_for('urunler', kategori=kategori_id, q=query, siralama=siralama, sayfa=p) }}"
+       class="page-btn {% if p == sayfa %}active{% endif %}">{{ p }}</a>
+    {% endfor %}
+    {% if sayfa < toplam_sayfa %}
+    <a href="{{ url_for('urunler', kategori=kategori_id, q=query, siralama=siralama, sayfa=sayfa+1) }}" class="page-btn">›</a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% block scripts %}
+<script>
+document.getElementById('liveSearch').addEventListener('input', function() {
+    const val = this.value.toLowerCase();
+    document.querySelectorAll('.product-card').forEach(c => {
+        const name = c.querySelector('h3').textContent.toLowerCase();
+        c.style.display = name.includes(val) ? '' : 'none';
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

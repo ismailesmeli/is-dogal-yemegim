@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block content %}
+<div style="max-width:680px;margin:40px auto">
+    <h2 class="page-title">📦 Siparişi Tamamla</h2>
+
+    <div style="display:flex;gap:24px;flex-wrap:wrap">
+        <!-- Sipariş Özeti -->
+        <div style="flex:1;min-width:240px;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px">
+            <h4 style="color:var(--primary);margin-bottom:14px;border-bottom:2px solid var(--border);padding-bottom:10px">Sipariş Özeti</h4>
+            {% for item in sepet %}
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.88rem">
+                <span>{{ item.ad }} × {{ item.get('adet', 1) }}</span>
+                <strong style="color:var(--primary)">{{ item.fiyat * item.get('adet', 1) }} TL</strong>
+            </div>
+            {% endfor %}
+            <div style="display:flex;justify-content:space-between;margin-top:14px;font-size:1.1rem;font-weight:800;color:var(--primary-dark)">
+                <span>Toplam</span>
+                <span style="color:var(--primary)">{{ toplam }} TL</span>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <div style="flex:2;min-width:280px;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px">
+            <h4 style="color:var(--primary);margin-bottom:18px">Teslimat Bilgileri</h4>
+            <form action="{{ url_for('siparis_tamamla') }}" method="POST">
+                <div class="form-group">
+                    <label class="form-label">Ad Soyad *</label>
+                    <input type="text" name="ad" required class="form-input" placeholder="Adınız Soyadınız">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Telefon *</label>
+                    <input type="tel" name="tel" required class="form-input" placeholder="05xx xxx xx xx">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Açık Adres *</label>
+                    <textarea name="adres" required class="form-textarea" placeholder="Mahalle, sokak, kapı no, ilçe, şehir..."></textarea>
+                </div>
+                <div style="background:#e8f5e9;border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:18px;font-size:0.82rem;color:var(--success)">
+                    ✓ Siparişiniz kaydedildikten sonra WhatsApp'a yönlendirileceksiniz.
+                </div>
+                <button type="submit" class="btn btn-wa btn-lg" style="width:100%">
+                    WhatsApp ile Onayla 🚀
+                </button>
+                <a href="{{ url_for('sepet_goruntule') }}" style="display:block;text-align:center;margin-top:12px;color:var(--text-muted);font-size:0.85rem;text-decoration:none">← Sepete Geri Dön</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

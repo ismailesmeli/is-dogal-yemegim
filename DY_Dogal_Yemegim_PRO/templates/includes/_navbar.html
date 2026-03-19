@@ -1,0 +1,17 @@
+<header class="navbar">
+    <a href="/" class="logo">DY <span>Doğal</span> Yemeğim</a>
+    <button class="hamburger" id="hamburger" aria-label="Menü">&#9776;</button>
+    <nav id="main-nav">
+        <a href="/">Ana Sayfa</a>
+        <a href="/urunler">Ürünler</a>
+        <a href="/hakkimizda">Hakkımızda</a>
+        <a href="/iletisim">İletişim</a>
+        {% if session.get('admin_girdi') %}
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-admin">⚡ Admin</a>
+            <a href="{{ url_for('admin_siparisler') }}" class="nav-admin">📦 Siparişler</a>
+            <a href="{{ url_for('logout') }}" class="nav-logout">Çıkış</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">Giriş</a>
+        {% endif %}
+    </nav>
+</header>

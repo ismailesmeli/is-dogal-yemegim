@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-content">
+        <h1>Doğanın En Taze Lezzetleri</h1>
+        <p>Dalından kapınıza, %100 katkısız ve organik doğal ürünler.</p>
+        <div class="hero-btns">
+            <a href="/urunler" class="btn btn-primary btn-lg">Ürünleri Keşfet</a>
+            <a href="/hakkimizda" class="btn btn-outline btn-lg" style="color:white;border-color:white">Hakkımızda</a>
+        </div>
+    </div>
+</div>
+
+<!-- TRUST BADGES -->
+<div class="features">
+    <div class="feature-card">
+        <div class="feature-icon">🌱</div>
+        <h3>%100 Organik</h3>
+        <p>Kimyasal ve koruyucu maddelerden arındırılmış saf ürünler.</p>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">🚜</div>
+        <h3>Yerel Üretim</h3>
+        <p>Küçük üreticiden doğrudan sofranıza ulaşıyor.</p>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">🚚</div>
+        <h3>Hızlı Teslimat</h3>
+        <p>Siparişleriniz en taze haliyle kapınıza geliyor.</p>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <h3>WhatsApp Destek</h3>
+        <p>7/24 WhatsApp üzerinden sipariş ve destek alın.</p>
+    </div>
+</div>
+
+<!-- KATEGORİLER -->
+{% if kategoriler %}
+<div class="section-heading">
+    <h2>Kategoriler</h2>
+    <div class="section-line"></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-bottom:48px">
+    {% for k in kategoriler %}
+    <a href="/urunler?kategori={{ k.id }}" style="text-decoration:none">
+        <div style="background:var(--white);border-radius:var(--radius);padding:20px;text-align:center;box-shadow:var(--shadow-sm);transition:transform 0.2s,box-shadow 0.2s;border-bottom:3px solid var(--primary)" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='var(--shadow)'" onmouseout="this.style.transform='';this.style.boxShadow='var(--shadow-sm)'">
+            <div style="font-size:2rem;margin-bottom:8px">{{ k.ikon }}</div>
+            <div style="font-weight:600;font-size:0.9rem;color:var(--primary-dark)">{{ k.ad }}</div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- ÖNE ÇIKAN ÜRÜNLER -->
+{% if featured %}
+<div class="section-heading">
+    <h2>Öne Çıkan Ürünler</h2>
+    <div class="section-line"></div>
+    <a href="/urunler" style="font-size:0.85rem;color:var(--primary);text-decoration:none;white-space:nowrap;font-weight:600">Tümünü Gör →</a>
+</div>
+<div class="product-grid" style="margin-bottom:20px">
+    {% for urun in featured %}
+    <div class="product-card">
+        <div class="badges">
+            <span class="badge badge-featured">⭐ Öne Çıkan</span>
+            {% if urun.indirim_fiyat %}<span class="badge badge-sale">İNDİRİM</span>{% endif %}
+        </div>
+        <a href="{{ url_for('urun_detay', id=urun.id) }}" style="text-decoration:none;color:inherit">
+            <div class="img-wrap">
+                <img src="{{ urun.resim }}" alt="{{ urun.ad }}" onerror="this.src='https://via.placeholder.com/300x200?text=DY'">
+            </div>
+            <h3>{{ urun.ad }}</h3>
+        </a>
+        <div class="price-row">
+            {% if urun.indirim_fiyat %}
+                <span class="price-main">{{ urun.indirim_fiyat }} TL</span>
+                <span class="price-old">{{ urun.fiyat }} TL</span>
+            {% else %}
+                <span class="price-main">{{ urun.fiyat }} TL</span>
+            {% endif %}
+        </div>
+        <div class="action-buttons">
+            {% if urun.stok > 0 %}
+            <a href="{{ url_for('sepete_ekle', id=urun.id) }}" class="btn btn-primary">🛒 Sepete Ekle</a>
+            {% else %}
+            <span class="btn btn-disabled">Stokta Yok</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

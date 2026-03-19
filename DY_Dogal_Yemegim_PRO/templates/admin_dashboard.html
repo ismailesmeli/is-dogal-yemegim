@@ -1,0 +1,116 @@
+{% extends "layout.html" %}
+{% block content %}
+<div style="max-width:1100px;margin:0 auto">
+    <h1 style="font-family:'Playfair Display',serif;color:var(--primary-dark);margin-bottom:28px">📊 Patron Masası</h1>
+
+    <!-- Stat Cards -->
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-label">Toplam Ürün</div>
+            <div class="stat-value">{{ toplam_urun }}</div>
+        </div>
+        <div class="stat-card accent">
+            <div class="stat-label">Toplam Sipariş</div>
+            <div class="stat-value">{{ toplam_siparis }}</div>
+        </div>
+        <div class="stat-card info">
+            <div class="stat-label">Bugün Sipariş</div>
+            <div class="stat-value">{{ bugun_siparis }}</div>
+        </div>
+        <div class="stat-card" style="border-color:#27ae60">
+            <div class="stat-label">Toplam Gelir</div>
+            <div class="stat-value" style="color:#27ae60">{{ toplam_gelir }}</div>
+            <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px">TL</div>
+        </div>
+        <div class="stat-card danger">
+            <div class="stat-label">Bekleyen Yorum</div>
+            <div class="stat-value">{{ bekleyen_yorum_sayi }}</div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:36px">
+        <a href="{{ url_for('urun_ekle') }}" class="btn btn-primary">+ Ürün Ekle</a>
+        <a href="{{ url_for('admin_siparisler') }}" class="btn btn-accent">📦 Siparişler</a>
+        <a href="{{ url_for('admin_kategoriler') }}" class="btn btn-outline">🏷️ Kategoriler</a>
+        <a href="{{ url_for('urunler') }}" class="btn btn-outline">🛍️ Vitrin</a>
+    </div>
+
+    <!-- Stok Uyarısı -->
+    {% if stok_az %}
+    <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:var(--radius);padding:18px 22px;margin-bottom:28px">
+        <strong style="color:#856404">⚠️ Stok Uyarısı:</strong>
+        <span style="color:#856404;font-size:0.9rem">
+            Şu ürünlerin stoğu kritik seviyede:
+            {% for u in stok_az %}
+            <a href="{{ url_for('urun_guncelle', id=u.id) }}" style="color:#856404;font-weight:700">{{ u.ad }} ({{ u.stok }})</a>{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        </span>
+    </div>
+    {% endif %}
+
+    <!-- Son Siparişler -->
+    <div style="margin-bottom:36px">
+        <div class="section-heading">
+            <h2 style="font-size:1.3rem">Son Siparişler</h2>
+            <div class="section-line"></div>
+            <a href="{{ url_for('admin_siparisler') }}" style="font-size:0.85rem;color:var(--primary);text-decoration:none;white-space:nowrap;font-weight:600">Tümünü Gör →</a>
+        </div>
+        {% if son_siparisler %}
+        <div style="overflow-x:auto">
+        <table class="data-table">
+            <thead><tr>
+                <th>#</th><th>Müşteri</th><th>Tutar</th><th>Durum</th><th>Tarih</th>
+            </tr></thead>
+            <tbody>
+            {% for s in son_siparisler %}
+            <tr>
+                <td>#{{ s.id }}</td>
+                <td><strong>{{ s.musteri_ad }}</strong><br><small style="color:var(--text-muted)">{{ s.tel }}</small></td>
+                <td style="font-weight:700;color:var(--primary)">{{ s.toplam }} TL</td>
+                <td><span class="status-badge status-{{ s.durum|lower|replace(' ','') }}">{{ s.durum }}</span></td>
+                <td style="color:var(--text-muted);font-size:0.82rem">{{ s.tarih[:16] }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <p style="color:var(--text-muted)">Henüz sipariş yok.</p>
+        {% endif %}
+    </div>
+
+    <!-- Bekleyen Yorumlar -->
+    <div>
+        <div class="section-heading">
+            <h2 style="font-size:1.3rem">Onay Bekleyen Yorumlar
+                {% if bekleyen_yorum_sayi %}<span class="badge badge-sale" style="font-size:0.75rem;vertical-align:middle;margin-left:6px">{{ bekleyen_yorum_sayi }}</span>{% endif %}
+            </h2>
+            <div class="section-line"></div>
+        </div>
+        {% if bekleyen_yorumlar %}
+        <div style="overflow-x:auto">
+        <table class="data-table">
+            <thead><tr><th>Ürün</th><th>Müşteri</th><th>Yorum</th><th>Puan</th><th>İşlem</th></tr></thead>
+            <tbody>
+            {% for y in bekleyen_yorumlar %}
+            <tr>
+                <td style="font-weight:600;color:var(--primary)">{{ y.urun_ad }}</td>
+                <td>{{ y.isim }}</td>
+                <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ y.yorum_metni }}</td>
+                <td><span style="color:#f1c40f">{{ "★" * y.puan }}</span></td>
+                <td>
+                    <a href="{{ url_for('yorum_onayla', id=y.id) }}" style="color:var(--success);font-weight:700;text-decoration:none;margin-right:10px">✓ Onayla</a>
+                    <a href="{{ url_for('yorum_sil', id=y.id) }}" onclick="return confirm('Yorumu sil?')" style="color:var(--danger);font-weight:700;text-decoration:none">✕ Sil</a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <p style="color:var(--text-muted)">Onay bekleyen yorum yok.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

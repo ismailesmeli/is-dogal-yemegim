@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="DY Doğal Yemeğim - %100 organik, doğal ve yöresel ürünler kapınıza geliyor.">
+    <link rel="icon" href="/static/img/logo.png" type="image/x-icon">
+    <title>{% block title %}DY Doğal Yemeğim{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    {% include 'includes/_navbar.html' %}
+
+    <div style="overflow:hidden">
+        <button id="darkModeToggle">🌙 Karanlık Mod</button>
+    </div>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    {% include 'includes/_footer.html' %}
+
+    <!-- Fixed Cart Button -->
+    <button class="fixed-cart-btn" onclick="openCart()" style="position:relative">
+        <span style="font-size:1.3rem">🛒</span>
+        <span class="btn-cart-text">Sepetim</span>
+        <span class="cart-bubble" id="cartCountBubble">{{ get_sepet_adet() }}</span>
+    </button>
+
+    <!-- Side Cart -->
+    <div id="sideCart">
+        <div class="cart-header">
+            <h3>🛒 Sepetim</h3>
+            <button class="cart-close" onclick="closeCart()">&times;</button>
+        </div>
+        <div class="cart-items" id="cartItemsList">
+            {% set sepet = session.get('sepet', []) %}
+            {% if sepet %}
+                {% for item in sepet %}
+                <div class="cart-item">
+                    <img src="{{ item.resim or 'https://via.placeholder.com/52?text=🍯' }}"
+                         alt="{{ item.ad }}" onerror="this.src='https://via.placeholder.com/52?text=DY'">
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">{{ item.ad }}</div>
+                        <div class="cart-item-price">{{ item.fiyat }} TL</div>
+                        <div class="cart-item-qty">Adet: {{ item.get('adet', 1) }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="text-align:center; color:#aaa; margin-top:60px; font-size:0.9rem">Sepetiniz boş 🍯</p>
+            {% endif %}
+        </div>
+        {% if session.get('sepet') %}
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Toplam</span>
+                <span style="color:var(--primary)">
+                    {{ session.get('sepet', []) | map(attribute='fiyat') | list | sum }} TL
+                </span>
+            </div>
+            <a href="{{ url_for('sepet_goruntule') }}" class="btn btn-primary" style="display:block; text-align:center; margin-bottom:8px">
+                Sepete Git
+            </a>
+            <a href="{{ url_for('sepet_temizle') }}" style="display:block; text-align:center; color:var(--danger); font-size:0.82rem; text-decoration:none">
+                Sepeti Boşalt
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    <div id="cartOverlay" onclick="closeCart()"></div>
+
+    <!-- Scroll Top -->
+    <button id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+    <!-- Flash → Toast -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <script>
+        const _flashMsgs = {{ messages | tojson }};
+        </script>
+        {% endif %}
+    {% endwith %}
+
+    <script>
+    // ── Dark Mode
+    (function() {
+        const t = document.getElementById('darkModeToggle');
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-theme');
+            if (t) t.textContent = '☀️ Aydınlık Mod';
+        }
+        if (t) t.addEventListener('click', function() {
+            document.body.classList.toggle('dark-theme');
+            const d = document.body.classList.contains('dark-theme');
+            t.textContent = d ? '☀️ Aydınlık Mod' : '🌙 Karanlık Mod';
+            localStorage.setItem('theme', d ? 'dark' : 'light');
+        });
+    })();
+
+    // ── Side Cart
+    function openCart() {
+        document.getElementById('sideCart').classList.add('open');
+        document.getElementById('cartOverlay').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+    function closeCart() {
+        document.getElementById('sideCart').classList.remove('open');
+        document.getElementById('cartOverlay').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    // ── Scroll Top
+    const scrollBtn = document.getElementById('scrollTop');
+    window.addEventListener('scroll', function() {
+        scrollBtn.classList.toggle('visible', window.scrollY > 400);
+    });
+
+    // ── Scroll position memory
+    window.addEventListener('beforeunload', () => localStorage.setItem('sp', window.scrollY));
+    window.addEventListener('load', function() {
+        const sp = localStorage.getItem('sp');
+        if (sp) { setTimeout(() => { window.scrollTo({top:+sp,behavior:'instant'}); localStorage.removeItem('sp'); }, 10); }
+    });
+
+    // ── Hamburger
+    const hbg = document.getElementById('hamburger');
+    if (hbg) hbg.addEventListener('click', () => document.getElementById('main-nav').classList.toggle('open'));
+
+    // ── Toast
+    const icons = { success: '✅', danger: '❌', info: 'ℹ️', warning: '⚠️' };
+    function showToast(msg, cat) {
+        cat = cat || 'info';
+        const c = document.getElementById('toastContainer');
+        const d = document.createElement('div');
+        d.className = `toast toast-${cat}`;
+        d.innerHTML = `<span class="toast-icon">${icons[cat]||'💬'}</span><span>${msg}</span>`;
+        d.onclick = () => d.remove();
+        c.appendChild(d);
+        setTimeout(() => d.remove(), 3500);
+    }
+    if (typeof _flashMsgs !== 'undefined') {
+        _flashMsgs.forEach(([cat, msg]) => showToast(msg, cat));
+    }
+    // Auto-open cart when item added
+    if (typeof _flashMsgs !== 'undefined') {
+        _flashMsgs.forEach(([cat, msg]) => {
+            if (cat === 'success' && msg.toLowerCase().includes('sepete eklendi')) openCart();
+        });
+    }
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

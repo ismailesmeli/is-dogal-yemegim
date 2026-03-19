@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block content %}
+<div style="max-width:600px;margin:60px auto;text-align:center">
+    <div style="background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:48px 36px">
+        <div style="width:80px;height:80px;background:#e8f5e9;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:2.5rem">
+            ✅
+        </div>
+        <h1 style="font-family:'Playfair Display',serif;color:var(--primary);margin-bottom:10px">Siparişiniz Alındı!</h1>
+        <div style="display:inline-block;background:var(--cream);border:2px solid var(--primary);border-radius:var(--radius-pill);padding:8px 24px;margin-bottom:20px">
+            <span style="color:var(--text-muted);font-size:0.85rem">Sipariş No</span>
+            <span style="color:var(--primary);font-size:1.4rem;font-weight:800;margin-left:10px">#{{ siparis.id }}</span>
+        </div>
+        <p style="color:#666;margin-bottom:28px;font-size:0.95rem;line-height:1.8">
+            Merhaba <strong>{{ siparis.ad }}</strong>, siparişiniz başarıyla kaydedildi.<br>
+            Aşağıdaki butona tıklayarak WhatsApp üzerinden siparişinizi onaylayın.
+        </p>
+
+        <!-- Order Items -->
+        <div style="background:var(--cream);border-radius:var(--radius-sm);padding:16px;margin-bottom:28px;text-align:left">
+            {% for item in siparis.urunler %}
+            <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:0.88rem;border-bottom:1px solid var(--border)">
+                <span>{{ item.ad }} × {{ item.get('adet', 1) }}</span>
+                <strong>{{ item.fiyat * item.get('adet', 1) }} TL</strong>
+            </div>
+            {% endfor %}
+            <div style="display:flex;justify-content:space-between;margin-top:10px;font-weight:800;color:var(--primary)">
+                <span>Toplam</span>
+                <span>{{ siparis.toplam }} TL</span>
+            </div>
+        </div>
+
+        <a href="{{ siparis.wa_url }}" target="_blank" class="btn btn-wa btn-lg" style="display:block;margin-bottom:14px">
+            📱 WhatsApp ile Onayla
+        </a>
+        <a href="{{ url_for('home') }}" class="btn btn-outline" style="display:block">
+            Ana Sayfaya Dön
+        </a>
+    </div>
+</div>
+{% endblock %}

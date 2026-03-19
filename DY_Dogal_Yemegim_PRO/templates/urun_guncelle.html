@@ -1,0 +1,106 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="form-card" style="max-width:600px">
+    <h2 class="form-title">✏️ Ürün Güncelle</h2>
+    <div style="text-align:center;margin-bottom:20px;font-size:0.9rem;color:var(--text-muted)">{{ urun.ad }}</div>
+
+    <form action="{{ url_for('urun_guncelle', id=urun.id) }}" method="POST" enctype="multipart/form-data">
+
+        <div class="form-group">
+            <label class="form-label">Ürün Adı *</label>
+            <input type="text" name="ad" value="{{ urun.ad }}" required class="form-input">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="form-group">
+                <label class="form-label">Normal Fiyat (TL) *</label>
+                <input type="number" name="fiyat" value="{{ urun.fiyat }}" required class="form-input" min="0">
+            </div>
+            <div class="form-group">
+                <label class="form-label">İndirimli Fiyat (TL)</label>
+                <input type="number" name="indirim_fiyat" value="{{ urun.indirim_fiyat or '' }}" class="form-input" min="0">
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="form-group">
+                <label class="form-label">Kategori</label>
+                <select name="kategori_id" class="form-select">
+                    <option value="">-- Seç --</option>
+                    {% for k in kategoriler %}
+                    <option value="{{ k.id }}" {% if urun.kategori_id == k.id %}selected{% endif %}>{{ k.ikon }} {{ k.ad }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Stok Adedi</label>
+                <input type="number" name="stok" value="{{ urun.stok or 100 }}" class="form-input" min="0">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Ürün Fotoğrafı (Yeni Seç)</label>
+            <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
+                <div class="drop-zone-icon">☁️</div>
+                <p style="margin:0;font-size:0.88rem;color:#666">Tıkla veya sürükle-bırak</p>
+                <input type="file" id="fileInput" name="resim_dosya" accept="image/*" style="display:none" onchange="previewImg(this)">
+            </div>
+            {% if urun.resim %}
+            <img id="imgPreview" src="{{ urun.resim }}" style="max-width:100%;border-radius:var(--radius-sm);margin-top:10px;max-height:160px;object-fit:cover"
+                 onerror="this.style.display='none'">
+            {% else %}
+            <img id="imgPreview" src="" style="display:none;max-width:100%;border-radius:var(--radius-sm);margin-top:10px;max-height:160px;object-fit:cover">
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Ürün Açıklaması</label>
+            <textarea name="aciklama" class="form-textarea">{{ urun.aciklama or '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">WhatsApp Kısa Mesaj</label>
+            <input type="text" name="mesaj" value="{{ urun.mesaj or '' }}" class="form-input">
+        </div>
+
+        <div class="form-group" style="display:flex;gap:24px;flex-wrap:wrap">
+            <label class="form-check">
+                <input type="checkbox" name="featured" {% if urun.featured %}checked{% endif %}>
+                <span>Öne Çıkan ⭐</span>
+            </label>
+            <label class="form-check">
+                <input type="checkbox" name="aktif" {% if urun.aktif %}checked{% endif %}>
+                <span>Aktif (vitrin'de göster)</span>
+            </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%">Değişiklikleri Kaydet</button>
+        <a href="{{ url_for('admin_dashboard') }}" style="display:block;text-align:center;margin-top:12px;color:var(--text-muted);font-size:0.85rem;text-decoration:none">Vazgeç</a>
+    </form>
+</div>
+
+{% block scripts %}
+<script>
+function previewImg(input) {
+    const file = input.files[0];
+    if (file) {
+        const r = new FileReader();
+        r.onload = e => {
+            const img = document.getElementById('imgPreview');
+            img.src = e.target.result;
+            img.style.display = 'block';
+        };
+        r.readAsDataURL(file);
+    }
+}
+['dragenter','dragover','dragleave','drop'].forEach(ev => {
+    document.querySelector('.drop-zone').addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); });
+});
+document.querySelector('.drop-zone').addEventListener('drop', e => {
+    const files = e.dataTransfer.files;
+    document.getElementById('fileInput').files = files;
+    previewImg(document.getElementById('fileInput'));
+});
+</script>
+{% endblock %}
+{% endblock %}

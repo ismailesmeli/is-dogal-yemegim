@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+{% block content %}
+<div style="max-width:800px;margin:0 auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px">
+        <h1 style="font-family:'Playfair Display',serif;color:var(--primary-dark)">🏷️ Kategori Yönetimi</h1>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline btn-sm">← Dashboard</a>
+    </div>
+
+    <!-- Ekle Formu -->
+    <div style="background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;margin-bottom:28px">
+        <h4 style="color:var(--primary);margin-bottom:16px">Yeni Kategori Ekle</h4>
+        <form action="{{ url_for('admin_kategoriler') }}" method="POST" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+            <div style="flex:2;min-width:180px">
+                <label class="form-label">Kategori Adı *</label>
+                <input type="text" name="ad" required class="form-input" placeholder="Örn: Bal Çeşitleri">
+            </div>
+            <div style="flex:1;min-width:120px">
+                <label class="form-label">İkon (Emoji)</label>
+                <input type="text" name="ikon" class="form-input" placeholder="🍯" maxlength="4">
+            </div>
+            <button type="submit" class="btn btn-primary" style="flex-shrink:0;padding:11px 22px">Ekle</button>
+        </form>
+    </div>
+
+    <!-- Kategori Listesi -->
+    {% if kategoriler %}
+    <div style="overflow-x:auto">
+    <table class="data-table">
+        <thead><tr>
+            <th>İkon</th><th>Kategori Adı</th><th>Ürün Sayısı</th><th>İşlem</th>
+        </tr></thead>
+        <tbody>
+        {% for k in kategoriler %}
+        <tr>
+            <td style="font-size:1.5rem;text-align:center">{{ k.ikon }}</td>
+            <td><strong>{{ k.ad }}</strong></td>
+            <td>
+                <a href="{{ url_for('urunler', kategori=k.id) }}" style="color:var(--primary);text-decoration:none;font-weight:600">
+                    {{ k.urun_sayisi }} ürün
+                </a>
+            </td>
+            <td>
+                <a href="{{ url_for('kategori_sil', id=k.id) }}"
+                   onclick="return confirm('{{ k.ad }} kategorisini silmek istediğine emin misin? Ürünlerin kategorisi kaldırılacak.')"
+                   class="btn btn-danger btn-sm">Sil</a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:40px;color:var(--text-muted)">
+        Henüz kategori yok. Yukarıdan ekleyebilirsin.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

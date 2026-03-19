@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+{% block content %}
+<div style="max-width:1100px;margin:0 auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:24px">
+        <h1 style="font-family:'Playfair Display',serif;color:var(--primary-dark)">📦 Siparişler</h1>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline btn-sm">← Dashboard</a>
+    </div>
+
+    <!-- Durum Filtre -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px">
+        {% for d in ['', 'Yeni', 'Hazırlanıyor', 'Kargoda', 'Teslim Edildi', 'İptal'] %}
+        <a href="{{ url_for('admin_siparisler', durum=d) }}"
+           class="cat-chip {% if durum_filtre == d %}active{% endif %}">
+            {% if d == '' %}Tümü{% else %}{{ d }}{% endif %}
+        </a>
+        {% endfor %}
+    </div>
+
+    {% if siparisler %}
+    <div style="overflow-x:auto">
+    <table class="data-table">
+        <thead><tr>
+            <th>#</th><th>Müşteri</th><th>Telefon</th><th>Adres</th><th>Ürünler</th><th>Tutar</th><th>Durum</th><th>Tarih</th><th>İşlem</th>
+        </tr></thead>
+        <tbody>
+        {% for s in siparisler %}
+        {% set urun_listesi = s.urunler_json | tojson | tojson %}
+        <tr>
+            <td style="font-weight:700">#{{ s.id }}</td>
+            <td><strong>{{ s.musteri_ad }}</strong></td>
+            <td style="font-size:0.85rem">{{ s.tel }}</td>
+            <td style="font-size:0.82rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ s.adres }}">{{ s.adres }}</td>
+            <td style="font-size:0.82rem;max-width:180px">
+                {% if s.urunler_json %}
+                    {% set items = s.urunler_json | from_json %}
+                    {% for item in items %}
+                        <div>{{ item.ad }} ×{{ item.get('adet', 1) }}</div>
+                    {% endfor %}
+                {% endif %}
+            </td>
+            <td style="font-weight:700;color:var(--primary)">{{ s.toplam }} TL</td>
+            <td>
+                <span class="status-badge status-{{ s.durum|lower|replace(' ','') }}">{{ s.durum }}</span>
+            </td>
+            <td style="color:var(--text-muted);font-size:0.8rem;white-space:nowrap">{{ s.tarih[:16] }}</td>
+            <td>
+                <form action="{{ url_for('siparis_durum', id=s.id) }}" method="POST" style="display:flex;gap:6px;align-items:center">
+                    <select name="durum" class="form-select" style="padding:5px 8px;font-size:0.8rem;width:auto">
+                        {% for d in ['Yeni', 'Hazırlanıyor', 'Kargoda', 'Teslim Edildi', 'İptal'] %}
+                        <option {% if s.durum == d %}selected{% endif %}>{{ d }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primary btn-sm">Güncelle</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:60px 0;color:var(--text-muted)">
+        <div style="font-size:3rem;margin-bottom:12px">📭</div>
+        <p>{% if durum_filtre %}Bu kategoride{% else %}Henüz{% endif %} sipariş yok.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
